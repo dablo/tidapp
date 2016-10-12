@@ -20,11 +20,19 @@ describe('kollega', () => {
 describe('period', () => {
 
     it('har ett år', () => {
-        expect(new Period(2016, 10).år).toBe(2016);
+        expect(new Period().år).toBe(2016);
     });
 
     it('har en månad', () => {
-        expect(new Period(2016, 10).månad).toBe(10);
+        expect(new Period().månad).toBe(9);
+    });
+
+    it('har en start', () => {
+        expect(new Period().firstDay.getDate()).toBe(new Date('2016-10-01').getUTCDate());
+    });
+
+    it('har ett slut', () => {
+        expect(new Period().lastDay.getDate()).toBe(new Date('2016-10-31').getUTCDate());
     });
 
 });
@@ -45,13 +53,15 @@ describe('tid', () => {
 describe('tidrapport', () => {
 
     var david = new Kollega('David Blomberg', 'david.blomberg@aptitud.se');
-    var oktober = new Period(2016, 10);
+    var oktober = new Period();
 
     it('har en kollega', () => {
         expect(new Tidrapport(david, oktober).kollega).toBe(david);
     });
 
     it('har en period', () => {
+        expect(new Tidrapport(david, oktober).period).toBe(oktober);
+        expect(new Tidrapport(david, oktober).period).toBe(oktober);
         expect(new Tidrapport(david, oktober).period).toBe(oktober);
     });
 

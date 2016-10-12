@@ -65,7 +65,7 @@ export class Tidrapport {
         rapport += '--------------------------------------------------------\n';
         rapport += 'Totalt                        ' +
             (this.summaTimmar() + '          ').slice(0, 10) + '          ' +
-            this.summaFaktura()+'\n';
+            this.summaFaktura() + '\n';
 
 
         rapport += '\nSjuk\n'
@@ -101,15 +101,24 @@ export class Kollega {
 
 export class Period {
     constructor(år, månad) {
-        this.år = år;
-        this.månad = månad;
+
+        this.år = new Date().getFullYear();
+        this.månad = new Date().getMonth();
+
+        if (år > 0) {
+            this.år = år;
+        }
+
+        if (månad > 0) {
+            this.månad = månad;
+        }
+
+        this.firstDay = new Date(this.år, this.månad, 1);
+        this.lastDay = new Date(this.år, this.månad + 1, 0);
     }
 
     format() {
-        var firstDay = new Date(this.år, this.månad - 1, 1);
-        var lastDay = new Date(this.år, this.månad - 1 + 1, 0);
-        
-        return firstDay.toISOString().slice(0, 10) + ' - ' + lastDay.toISOString().slice(0, 10);
+        return this.firstDay.toISOString().slice(0, 10) + ' - ' + this.lastDay.toISOString().slice(0, 10);
     }
 }
 

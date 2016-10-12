@@ -1,35 +1,51 @@
 <template>
   <div class="panel panel-primary">
     <div class="panel-heading">
-      <h3 class="panel-title">Tidrapport</h3>
+      <h3 class="panel-title">Tidrapport |> ${contact.firstName} ${contact.lastName}</h3>
     </div>
     <div class="panel-body">
       <form role="form" class="form-horizontal">
         <div class="form-group">
-          <label class="col-sm-2 control-label">First Name</label>
-          <div class="col-sm-10">
-            <input type="text" placeholder="first name" class="form-control" value.bind="contact.firstName">
-          </div>
+          <label class="col-sm-3">Kollega</label>
+          <label class="col-sm-3">Period</label>
         </div>
 
         <div class="form-group">
-          <label class="col-sm-2 control-label">Last Name</label>
-          <div class="col-sm-10">
-            <input type="text" placeholder="last name" class="form-control" value.bind="contact.lastName">
-          </div>
+          <label class="col-sm-3">${contact.firstName} ${contact.lastName}</label>
+          <label class="col-sm-9">${tidrapport.period.format()}</label>
+        </div>
+
+        <div class="form-group">  
+          <label class="col-sm-2">Kund</label>
+          <label class="col-sm-2">Projekt</label>
+          <label class="col-sm-2">Timmar</label>
+          <label class="col-sm-2">Pris</label>
+          <label class="col-sm-2">Summa</label>
+        </div>
+
+        <div class="form-group" repeat.for="timmar of tidrapport.projektTider">
+          <label class="col-sm-2">${timmar.kund}</label>
+          <label class="col-sm-2">${timmar.projekt}</label>
+          <label class="col-sm-2">${timmar.timmar}</label>
+          <label class="col-sm-2">${timmar.timpris}</label>
+          <label class="col-sm-2">${timmar.summa()}</label>
         </div>
 
         <div class="form-group">
-          <label class="col-sm-2 control-label">Email</label>
-          <div class="col-sm-10">
-            <input type="text" placeholder="email" class="form-control" value.bind="contact.email">
+          <div class="col-sm-2">
+            <input type="text" placeholder="kund" class="form-control" value.bind="nyTid.kund">
           </div>
-        </div>
-
-        <div class="form-group">
-          <label class="col-sm-2 control-label">Phone Number</label>
-          <div class="col-sm-10">
-            <input type="text" placeholder="phone number" class="form-control" value.bind="contact.phoneNumber">
+          <div class="col-sm-2">
+            <input type="text" placeholder="projekt" class="form-control" value.bind="nyTid.projekt">
+          </div>
+          <div class="col-sm-2">
+            <input type="text" placeholder="timmar" class="form-control" value.bind="nyTid.timmar">
+          </div>
+          <div class="col-sm-2">
+            <input type="text" placeholder="pris" class="form-control" value.bind="nyTid.timpris">
+          </div>
+          <div class="col-sm-2">
+            <button type="button" click.delegate="addTid()">Lägg till</button>
           </div>
         </div>
       </form>

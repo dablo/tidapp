@@ -8,37 +8,37 @@ function getId() {
 let contacts = [
   {
     id: getId(),
-    firstName: 'John',
-    lastName: 'Tolkien',
-    email: 'tolkien@inklings.com',
-    phoneNumber: '867-5309'
+    firstName: 'David',
+    lastName: 'Blomberg',
+    email: 'david.blomberg@aptitud.se',
+    phoneNumber: '0733-099990'
   },
   {
     id: getId(),
-    firstName: 'Clive',
-    lastName: 'Lewis',
-    email: 'lewis@inklings.com',
-    phoneNumber: '867-5309'
+    firstName: 'Anders',
+    lastName: 'Löwenborg',
+    email: 'anders.lowenborg@aptitud.se',
+    phoneNumber: '0733-099990'
   },
   {
     id: getId(),
-    firstName: 'Owen',
-    lastName: 'Barfield',
-    email: 'barfield@inklings.com',
-    phoneNumber: '867-5309'
+    firstName: 'Tomas',
+    lastName: 'Näslund',
+    email: 'tomas.naslund@aptitud.se',
+    phoneNumber: '0733-099990'
   },
   {
     id: getId(),
-    firstName: 'Charles',
-    lastName: 'Williams',
-    email: 'williams@inklings.com',
-    phoneNumber: '867-5309'
+    firstName: 'Åsa',
+    lastName: 'Liljegren',
+    email: 'asa.liljegren@aptitud.se',
+    phoneNumber: '0733-099990'
   },
   {
     id: getId(),
-    firstName: 'Roger',
-    lastName: 'Green',
-    email: 'green@inklings.com',
+    firstName: 'Håkan',
+    lastName: 'Alexander',
+    email: 'hakan.alexander@aptitud.se',
     phoneNumber: '867-5309'
   }
 ];

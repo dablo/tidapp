@@ -403,15 +403,23 @@ define('tidrapport',['exports'], function (exports) {
         function Period(år, månad) {
             _classCallCheck(this, Period);
 
-            this.år = år;
-            this.månad = månad;
+            this.år = new Date().getFullYear();
+            this.månad = new Date().getMonth();
+
+            if (år > 0) {
+                this.år = år;
+            }
+
+            if (månad > 0) {
+                this.månad = månad;
+            }
+
+            this.firstDay = new Date(this.år, this.månad, 1);
+            this.lastDay = new Date(this.år, this.månad + 1, 0);
         }
 
         Period.prototype.format = function format() {
-            var firstDay = new Date(this.år, this.månad - 1, 1);
-            var lastDay = new Date(this.år, this.månad - 1 + 1, 0);
-
-            return firstDay.toISOString().slice(0, 10) + ' - ' + lastDay.toISOString().slice(0, 10);
+            return this.firstDay.toISOString().slice(0, 10) + ' - ' + this.lastDay.toISOString().slice(0, 10);
         };
 
         return Period;
@@ -479,33 +487,33 @@ define('web-api',['exports'], function (exports) {
 
   var contacts = [{
     id: getId(),
-    firstName: 'John',
-    lastName: 'Tolkien',
-    email: 'tolkien@inklings.com',
-    phoneNumber: '867-5309'
+    firstName: 'David',
+    lastName: 'Blomberg',
+    email: 'david.blomberg@aptitud.se',
+    phoneNumber: '0733-099990'
   }, {
     id: getId(),
-    firstName: 'Clive',
-    lastName: 'Lewis',
-    email: 'lewis@inklings.com',
-    phoneNumber: '867-5309'
+    firstName: 'Anders',
+    lastName: 'Löwenborg',
+    email: 'anders.lowenborg@aptitud.se',
+    phoneNumber: '0733-099990'
   }, {
     id: getId(),
-    firstName: 'Owen',
-    lastName: 'Barfield',
-    email: 'barfield@inklings.com',
-    phoneNumber: '867-5309'
+    firstName: 'Tomas',
+    lastName: 'Näslund',
+    email: 'tomas.naslund@aptitud.se',
+    phoneNumber: '0733-099990'
   }, {
     id: getId(),
-    firstName: 'Charles',
-    lastName: 'Williams',
-    email: 'williams@inklings.com',
-    phoneNumber: '867-5309'
+    firstName: 'Åsa',
+    lastName: 'Liljegren',
+    email: 'asa.liljegren@aptitud.se',
+    phoneNumber: '0733-099990'
   }, {
     id: getId(),
-    firstName: 'Roger',
-    lastName: 'Green',
-    email: 'green@inklings.com',
+    firstName: 'Håkan',
+    lastName: 'Alexander',
+    email: 'hakan.alexander@aptitud.se',
     phoneNumber: '867-5309'
   }];
 
@@ -729,7 +737,7 @@ define('contact-detail.1',['exports', 'aurelia-event-aggregator', './web-api', '
     return ContactDetail;
   }(), _class.inject = [_webApi.WebAPI, _aureliaEventAggregator.EventAggregator], _temp);
 });
-define('tid-rapport',['exports', 'aurelia-event-aggregator', './web-api', './messages', './utility'], function (exports, _aureliaEventAggregator, _webApi, _messages, _utility) {
+define('tid-rapport',['exports', 'aurelia-event-aggregator', './web-api', './messages', './utility', './tidrapport'], function (exports, _aureliaEventAggregator, _webApi, _messages, _utility, _tidrapport) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -767,6 +775,8 @@ define('tid-rapport',['exports', 'aurelia-event-aggregator', './web-api', './mes
     function ContactDetail(api, ea) {
       _classCallCheck(this, ContactDetail);
 
+      this.månader = [{ id: 0, name: 'Januari' }, { id: 1, name: 'Februari' }, { id: 2, name: 'Mars' }, { id: 3, name: 'April' }, { id: 4, name: 'Maj' }, { id: 5, name: 'Juni' }, { id: 6, name: 'Juli' }, { id: 7, name: 'Augusti' }, { id: 8, name: 'September' }, { id: 9, name: 'Oktober' }, { id: 10, name: 'November' }, { id: 11, name: 'December' }];
+
       this.api = api;
       this.ea = ea;
     }
@@ -780,8 +790,20 @@ define('tid-rapport',['exports', 'aurelia-event-aggregator', './web-api', './mes
         _this.contact = contact;
         _this.routeConfig.navModel.setTitle(contact.firstName);
         _this.originalContact = JSON.parse(JSON.stringify(contact));
+        _this.initTidrapport();
+        _this.tidrapport.kollega = new _tidrapport.Kollega(contact.firstName + ' ' + contact.lastName, contact.firstName + '.' + contact.lastName + '@aptitud.se');
         _this.ea.publish(new _messages.ContactViewed(_this.contact));
       });
+    };
+
+    ContactDetail.prototype.initTidrapport = function initTidrapport() {
+      this.tidrapport = new _tidrapport.Tidrapport();
+      this.tidrapport.period = new _tidrapport.Period(new Date().getFullYear(), new Date().getMonth());
+
+      this.nyTid = new _tidrapport.Tid();
+      this.nyVabDag = new _tidrapport.Dag();
+      this.nySjukDag = new _tidrapport.Dag();
+      this.nySemesterDag = new _tidrapport.Dag();
     };
 
     ContactDetail.prototype.save = function save() {
@@ -809,6 +831,25 @@ define('tid-rapport',['exports', 'aurelia-event-aggregator', './web-api', './mes
       return true;
     };
 
+    ContactDetail.prototype.addTid = function addTid() {
+      console.log(this.tidrapport);
+      console.log(this.nyTid);
+
+      this.tidrapport.projektTider.push(new _tidrapport.Tid(this.nyTid.kund, this.nyTid.projekt, this.nyTid.timmar, this.nyTid.timpris));
+    };
+
+    ContactDetail.prototype.addVabDag = function addVabDag() {
+      this.tidrapport.vabDagar.push(new _tidrapport.Dag(nyVabDag.datum, nyVabDag.kommentar));
+    };
+
+    ContactDetail.prototype.addSjukDag = function addSjukDag() {
+      this.tidrapport.sjukDagar.push(new _tidrapport.Dag(nySjukDag.datum, nySjukDag.kommentar));
+    };
+
+    ContactDetail.prototype.addSemesterDag = function addSemesterDag() {
+      this.tidrapport.semesterDagar.push(new _tidrapport.Dag(nySemesterDag.datum, nySemesterDag.kommentar));
+    };
+
     _createClass(ContactDetail, [{
       key: 'canSave',
       get: function get() {
@@ -826,5 +867,5 @@ define('text!contact-list.html', ['module'], function(module) { module.exports =
 define('text!no-selection.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"no-selection text-center\">\r\n    <h2>${message}</h2>\r\n  </div>\r\n</template>"; });
 define('text!contact-detail.1.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"panel panel-primary\">\r\n    <div class=\"panel-heading\">\r\n      <h3 class=\"panel-title\">Profile</h3>\r\n    </div>\r\n    <div class=\"panel-body\">\r\n      <form role=\"form\" class=\"form-horizontal\">\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">First Name</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"first name\" class=\"form-control\" value.bind=\"contact.firstName\">\r\n          </div>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">Last Name</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"last name\" class=\"form-control\" value.bind=\"contact.lastName\">\r\n          </div>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">Email</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"email\" class=\"form-control\" value.bind=\"contact.email\">\r\n          </div>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">Phone Number</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"phone number\" class=\"form-control\" value.bind=\"contact.phoneNumber\">\r\n          </div>\r\n        </div>\r\n      </form>\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"button-bar\">\r\n    <button class=\"btn btn-success\" click.delegate=\"save()\" disabled.bind=\"!canSave\">Save</button>\r\n  </div>\r\n</template>"; });
 define('text!tidrapport.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"panel panel-primary\">\r\n    <div class=\"panel-heading\">\r\n      <h3 class=\"panel-title\">Profile</h3>\r\n    </div>\r\n    <div class=\"panel-body\">\r\n      <form role=\"form\" class=\"form-horizontal\">\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">First Name</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"first name\" class=\"form-control\" value.bind=\"contact.firstName\">\r\n          </div>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">Last Name</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"last name\" class=\"form-control\" value.bind=\"contact.lastName\">\r\n          </div>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">Email</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"email\" class=\"form-control\" value.bind=\"contact.email\">\r\n          </div>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">Phone Number</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"phone number\" class=\"form-control\" value.bind=\"contact.phoneNumber\">\r\n          </div>\r\n        </div>\r\n      </form>\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"button-bar\">\r\n    <button class=\"btn btn-success\" click.delegate=\"save()\" disabled.bind=\"!canSave\">Save</button>\r\n  </div>\r\n</template>"; });
-define('text!tid-rapport.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"panel panel-primary\">\r\n    <div class=\"panel-heading\">\r\n      <h3 class=\"panel-title\">Tidrapport</h3>\r\n    </div>\r\n    <div class=\"panel-body\">\r\n      <form role=\"form\" class=\"form-horizontal\">\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">First Name</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"first name\" class=\"form-control\" value.bind=\"contact.firstName\">\r\n          </div>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">Last Name</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"last name\" class=\"form-control\" value.bind=\"contact.lastName\">\r\n          </div>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">Email</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"email\" class=\"form-control\" value.bind=\"contact.email\">\r\n          </div>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">Phone Number</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"phone number\" class=\"form-control\" value.bind=\"contact.phoneNumber\">\r\n          </div>\r\n        </div>\r\n      </form>\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"button-bar\">\r\n    <button class=\"btn btn-success\" click.delegate=\"save()\" disabled.bind=\"!canSave\">Save</button>\r\n  </div>\r\n</template>"; });
+define('text!tid-rapport.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"panel panel-primary\">\r\n    <div class=\"panel-heading\">\r\n      <h3 class=\"panel-title\">Tidrapport |> ${contact.firstName} ${contact.lastName}</h3>\r\n    </div>\r\n    <div class=\"panel-body\">\r\n      <form role=\"form\" class=\"form-horizontal\">\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-3\">Kollega</label>\r\n          <label class=\"col-sm-3\">Period</label>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-3\">${contact.firstName} ${contact.lastName}</label>\r\n          <label class=\"col-sm-9\">${tidrapport.period.format()}</label>\r\n        </div>\r\n\r\n        <div class=\"form-group\">  \r\n          <label class=\"col-sm-2\">Kund</label>\r\n          <label class=\"col-sm-2\">Projekt</label>\r\n          <label class=\"col-sm-2\">Timmar</label>\r\n          <label class=\"col-sm-2\">Pris</label>\r\n          <label class=\"col-sm-2\">Summa</label>\r\n        </div>\r\n\r\n        <div class=\"form-group\" repeat.for=\"timmar of tidrapport.projektTider\">\r\n          <label class=\"col-sm-2\">${timmar.kund}</label>\r\n          <label class=\"col-sm-2\">${timmar.projekt}</label>\r\n          <label class=\"col-sm-2\">${timmar.timmar}</label>\r\n          <label class=\"col-sm-2\">${timmar.timpris}</label>\r\n          <label class=\"col-sm-2\">${timmar.summa()}</label>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <div class=\"col-sm-2\">\r\n            <input type=\"text\" placeholder=\"kund\" class=\"form-control\" value.bind=\"nyTid.kund\">\r\n          </div>\r\n          <div class=\"col-sm-2\">\r\n            <input type=\"text\" placeholder=\"projekt\" class=\"form-control\" value.bind=\"nyTid.projekt\">\r\n          </div>\r\n          <div class=\"col-sm-2\">\r\n            <input type=\"text\" placeholder=\"timmar\" class=\"form-control\" value.bind=\"nyTid.timmar\">\r\n          </div>\r\n          <div class=\"col-sm-2\">\r\n            <input type=\"text\" placeholder=\"pris\" class=\"form-control\" value.bind=\"nyTid.timpris\">\r\n          </div>\r\n          <div class=\"col-sm-2\">\r\n            <button type=\"button\" click.delegate=\"addTid()\">Lägg till</button>\r\n          </div>\r\n        </div>\r\n      </form>\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"button-bar\">\r\n    <button class=\"btn btn-success\" click.delegate=\"save()\" disabled.bind=\"!canSave\">Save</button>\r\n  </div>\r\n</template>"; });
 //# sourceMappingURL=app-bundle.js.map
