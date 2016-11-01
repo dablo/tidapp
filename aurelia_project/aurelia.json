@@ -139,6 +139,10 @@
             "path": "../scripts/text"
           },
           {
+            "name": "clipboard",
+            "path": "../node_modules/clipboard/dist/clipboard"
+          },
+          {
             "name": "aurelia-templating-resources",
             "path": "../node_modules/aurelia-templating-resources/dist/amd",
             "main": "aurelia-templating-resources"

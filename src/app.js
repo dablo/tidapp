@@ -10,9 +10,8 @@ export class App {
   configureRouter(config, router){
     config.title = 'Contacts';
     config.map([
-      { route: '',              moduleId: 'no-selection',   title: 'Select'},
-      { route: 'contacts/:id',  moduleId: 'contact-detail', name:'contacts' },
-      { route: 'tidrapport/:id',  moduleId: 'tid-rapport', name:'tidrapport' },
+      { route: '',                moduleId: 'login',   title: 'login'},
+      { route: 'tidrapport/:id',  moduleId: 'tid-rapport',    name: 'tidrapport' },
     ]);
 
     this.router = router;

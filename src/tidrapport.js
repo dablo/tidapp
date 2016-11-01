@@ -46,11 +46,17 @@ export class Tidrapport {
     }
 
     summaFaktura() {
-        return this.projektTider.reduce(function (a, b) { return a + b.summa(); }, 0)
+        return this.projektTider.map(x => x.summa()).reduce((a, b) => a + b);
     }
 
     summaTimmar() {
-        return this.projektTider.reduce(function (a, b) { return a + b.timmar; }, 0)
+        return this.projektTider.map(x => parseInt(x.timmar)).reduce((a, b) => a + b);
+        // console.log(this.projektTider)
+        // let timlista = this.projektTider.map(x => parseInt(x.timmar));
+        // console.log(timlista)
+        // let antal = timlista.reduce((a, b) => a + b);
+        // console.log(antal)
+        // return antal;
     }
 
     format() {
@@ -101,24 +107,25 @@ export class Kollega {
 
 export class Period {
     constructor(år, månad) {
+        var now = new Date();
 
-        this.år = new Date().getFullYear();
-        this.månad = new Date().getMonth();
+        if (now.getDate() < 10) {
+            this.lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+            this.firstDay = new Date(now.getFullYear(), (now.getMonth() - 1 + 12) % 12, 1);
+        }
+        else {
+            this.lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            this.firstDay = new Date(now.getFullYear(), (now.getMonth() + 12) % 12, 1);
+        }
 
         if (år > 0) {
-            this.år = år;
+            this.lastDay = new Date(år, månad + 1, 0);
+            this.firstDay = new Date(år, (månad + 12) % 12, 1);
         }
-
-        if (månad > 0) {
-            this.månad = månad;
-        }
-
-        this.firstDay = new Date(this.år, this.månad, 1);
-        this.lastDay = new Date(this.år, this.månad + 1, 0);
     }
 
     format() {
-        return this.firstDay.toISOString().slice(0, 10) + ' - ' + this.lastDay.toISOString().slice(0, 10);
+        return this.firstDay.getFullYear() + '-' + (this.firstDay.getMonth() + 1) + '-' + this.firstDay.getDate() + ' - ' + this.lastDay.getFullYear() + '-' + (this.lastDay.getMonth() + 1) + '-' + this.lastDay.getDate()
     }
 }
 

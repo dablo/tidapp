@@ -1,58 +1,63 @@
 <template>
-  <div class="panel panel-primary">
-    <div class="panel-heading">
-      <h3 class="panel-title">Tidrapport |> ${contact.firstName} ${contact.lastName}</h3>
-    </div>
-    <div class="panel-body">
-      <form role="form" class="form-horizontal">
-        <div class="form-group">
-          <label class="col-sm-3">Kollega</label>
-          <label class="col-sm-3">Period</label>
-        </div>
+	<div class="panel panel-primary">
+		<div class="panel-heading">
+			<h3 class="panel-title">Tidrapport |> ${contact.firstName} ${contact.lastName}</h3>
+		</div>
+		<div class="panel-body">
+			<form role="form" class="form-horizontal">
+				<div class="form-group">
+					<label class="col-sm-3">Kollega</label>
+					<label class="col-sm-3">Period</label>
+				</div>
 
-        <div class="form-group">
-          <label class="col-sm-3">${contact.firstName} ${contact.lastName}</label>
-          <label class="col-sm-9">${tidrapport.period.format()}</label>
-        </div>
+				<div class="form-group">
+					<label class="col-sm-3">${contact.firstName} ${contact.lastName}</label>
+					<label class="col-sm-9">${tidrapport.period.format()}</label>
+				</div>
 
-        <div class="form-group">  
-          <label class="col-sm-2">Kund</label>
-          <label class="col-sm-2">Projekt</label>
-          <label class="col-sm-2">Timmar</label>
-          <label class="col-sm-2">Pris</label>
-          <label class="col-sm-2">Summa</label>
-        </div>
+				<div class="form-group">
+					<label class="col-sm-2">Kund</label>
+					<label class="col-sm-2">Projekt</label>
+					<label class="col-sm-2">Timmar</label>
+					<label class="col-sm-2">Pris</label>
+					<label class="col-sm-2">Summa</label>
+				</div>
 
-        <div class="form-group" repeat.for="timmar of tidrapport.projektTider">
-          <label class="col-sm-2">${timmar.kund}</label>
-          <label class="col-sm-2">${timmar.projekt}</label>
-          <label class="col-sm-2">${timmar.timmar}</label>
-          <label class="col-sm-2">${timmar.timpris}</label>
-          <label class="col-sm-2">${timmar.summa()}</label>
-        </div>
+				<div class="form-group" repeat.for="timmar of tidrapport.projektTider">
+					<label class="col-sm-2">${timmar.kund}</label>
+					<label class="col-sm-2">${timmar.projekt}</label>
+					<label class="col-sm-2">${timmar.timmar}</label>
+					<label class="col-sm-2">${timmar.timpris}</label>
+					<label class="col-sm-2">${timmar.summa()}</label>
+				</div>
 
-        <div class="form-group">
-          <div class="col-sm-2">
-            <input type="text" placeholder="kund" class="form-control" value.bind="nyTid.kund">
-          </div>
-          <div class="col-sm-2">
-            <input type="text" placeholder="projekt" class="form-control" value.bind="nyTid.projekt">
-          </div>
-          <div class="col-sm-2">
-            <input type="text" placeholder="timmar" class="form-control" value.bind="nyTid.timmar">
-          </div>
-          <div class="col-sm-2">
-            <input type="text" placeholder="pris" class="form-control" value.bind="nyTid.timpris">
-          </div>
-          <div class="col-sm-2">
-            <button type="button" click.delegate="addTid()">Lägg till</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
+				<div class="form-group">
+					<div class="col-sm-2">
+						<input type="text" placeholder="kund" class="form-control" value.bind="nyTid.kund">
+					</div>
+					<div class="col-sm-2">
+						<input type="text" placeholder="projekt" class="form-control" value.bind="nyTid.projekt">
+					</div>
+					<div class="col-sm-2">
+						<input type="text" placeholder="timmar" class="form-control" value.bind="nyTid.timmar">
+					</div>
+					<div class="col-sm-2">
+						<input type="text" placeholder="pris" class="form-control" value.bind="nyTid.timpris">
+					</div>
+					<div class="col-sm-2">
+						<button type="button" click.delegate="addTid()">Lägg till</button>
+					</div>
+				</div>
 
-  <div class="button-bar">
-    <button class="btn btn-success" click.delegate="save()" disabled.bind="!canSave">Save</button>
-  </div>
+			</form>
+					<pre id="rapport">${rapportText}</pre>
+		</div>
+	</div>
+
+	<div class="button-bar">
+		<button class="btn btn-success" click.delegate="save()" disabled.bind="!canSave">Maila</button>
+		<!-- Trigger -->
+		<button class="btn btn-success copyButton" data-clipboard-target="#rapport" disabled.bind="!rapportText">Kopiera</button>
+	</div>
+
 </template>

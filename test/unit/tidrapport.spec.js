@@ -19,14 +19,6 @@ describe('kollega', () => {
 
 describe('period', () => {
 
-    it('har ett år', () => {
-        expect(new Period().år).toBe(2016);
-    });
-
-    it('har en månad', () => {
-        expect(new Period().månad).toBe(9);
-    });
-
     it('har en start', () => {
         expect(new Period().firstDay.getDate()).toBe(new Date('2016-10-01').getUTCDate());
     });
@@ -77,12 +69,23 @@ describe('tidrapport', () => {
     });
 
     it('kan beräkna summan för hela rapporten', () => {
-        var rapport = new Tidrapport(david, oktober);
-        var scaniatid1 = new Tid("Scania", "Pins", 100, 500);
-        var scaniatid2 = new Tid("Scania", "Pins", 50, 1000);
+        let rapport = new Tidrapport(david, oktober);
+        let scaniatid1 = new Tid("Scania", "Pins", 100, 500);
+        let scaniatid2 = new Tid("Scania", "Pins", 50, 1000);
         rapport.addTid(scaniatid1);
         rapport.addTid(scaniatid2);
         expect(rapport.summaFaktura()).toBe(100000);
+    });
+
+
+    it('kan summera timmar för hela rapporten', () => {
+        let rapport = new Tidrapport(david, oktober);
+        let scaniatid1 = new Tid("Scania", "Pins", 100, 500);
+        let scaniatid2 = new Tid("Scania", "Pins", 50, 1000);
+        rapport.addTid(scaniatid1);
+        rapport.addTid(scaniatid2);
+
+        expect(rapport.summaTimmar()).toBe(150);
     });
 
     it('har en kollega med namn David Blomberg', () => {
