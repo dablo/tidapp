@@ -478,8 +478,11 @@ define('tidrapport',['exports'], function (exports) {
         };
 
         Tidrapport.prototype.removeTid = function removeTid(tid) {
-            var index = this.projektTider.findIndex(tid);
-            if (index !== -1) this.projektTider.splice(tid);
+            var index = this.projektTider.findIndex(function (x) {
+                return x.projekt === tid.projekt && x.kund === tid.kund && x.timmar === tid.timmar && x.timpris === tid.timpris;
+            });
+
+            if (index !== -1) this.projektTider.splice(index);
         };
 
         Tidrapport.prototype.addVab = function addVab(dag) {

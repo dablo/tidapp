@@ -13,9 +13,11 @@ export class Tidrapport {
     }
 
     removeTid(tid) {
-        var index = this.projektTider.findIndex(tid);
+        //var index = this.projektTider.findIndex(x => Object.is(x, tid));
+        var index = this.projektTider.findIndex(x => x.projekt === tid.projekt && x.kund === tid.kund && x.timmar === tid.timmar && x.timpris === tid.timpris);
+
         if (index !== -1)
-            this.projektTider.splice(tid);
+            this.projektTider.splice(index);
     }
     addVab(dag) {
         this.vabDagar.push(dag);

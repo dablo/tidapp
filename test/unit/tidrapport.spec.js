@@ -53,8 +53,6 @@ describe('tidrapport', () => {
 
     it('har en period', () => {
         expect(new Tidrapport(david, oktober).period).toBe(oktober);
-        expect(new Tidrapport(david, oktober).period).toBe(oktober);
-        expect(new Tidrapport(david, oktober).period).toBe(oktober);
     });
 
     it('har en kollega med namn David Blomberg', () => {
@@ -66,6 +64,16 @@ describe('tidrapport', () => {
         var scaniatid = new Tid("Scania", "Pins", 150, 810);
         rapport.addTid(scaniatid);
         expect(rapport.projektTider.length).toBe(1);
+    });
+
+    it('kan ta bort tid', () => {
+        var rapport = new Tidrapport(david, oktober);
+        var scaniatid = new Tid("Scania", "Pins", 150, 810);
+        rapport.addTid(new Tid("Scania", "Pins", 150, 811));
+        rapport.addTid(new Tid("Scania", "Pins", 150, 812));
+        rapport.addTid(new Tid("Scania", "Pins", 150, 810));
+        rapport.removeTid(scaniatid);
+        expect(rapport.projektTider.length).toBe(2);
     });
 
     it('kan beräkna summan för hela rapporten', () => {
