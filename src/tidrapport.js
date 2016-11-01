@@ -46,11 +46,11 @@ export class Tidrapport {
     }
 
     summaFaktura() {
-        return this.projektTider.map(x => x.summa()).reduce((a, b) => a + b);
+        return this.projektTider.map(x => x.summa()).reduce((a, b) => a + b, 0);
     }
 
     summaTimmar() {
-        return this.projektTider.map(x => parseInt(x.timmar)).reduce((a, b) => a + b);
+        return this.projektTider.map(x => parseInt(x.timmar)).reduce((a, b) => a + b, 0);
         // console.log(this.projektTider)
         // let timlista = this.projektTider.map(x => parseInt(x.timmar));
         // console.log(timlista)

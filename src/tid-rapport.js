@@ -59,9 +59,9 @@ export class ContactDetail {
     this.tidrapport.period = new Period();
 
     this.nyTid = new Tid();
-    this.nyVabDag = new Dag();
-    this.nySjukDag = new Dag();
-    this.nySemesterDag = new Dag();
+    this.nyVabdag = new Dag();
+    this.nySjukdag = new Dag();
+    this.nySemesterdag = new Dag();
   }
 
   get canSave() {
@@ -102,18 +102,38 @@ export class ContactDetail {
     this.uppdateraRapport();
   }
 
-  addVabDag() {
-    this.tidrapport.addVab(new Dag(nyVabDag.datum, nyVabDag.kommentar));
+  removeTid(tid) {
+    this.tidrapport.removeTid(tid);
     this.uppdateraRapport();
   }
 
-  addSjukDag() {
-    this.tidrapport.addSjukDag(new Dag(nySjukDag.datum, nySjukDag.kommentar));
+  addVabdag() {
+    this.tidrapport.addVab(new Dag(this.nyVabdag.datum, this.nyVabdag.kommentar));
     this.uppdateraRapport();
   }
 
-  addSemesterDag() {
-    this.tidrapport.addSemester(new Dag(nySemesterDag.datum, nySemesterDag.kommentar));
+  removeVabdag(dag) {
+    this.tidrapport.removeVab(dag);
+    this.uppdateraRapport();
+  }
+
+  addSjukdag() {
+    this.tidrapport.addSjukDag(new Dag(new Date(this.nySjukdag.datum), ''));
+    this.uppdateraRapport();
+  }
+
+  removeSjukdag(dag) {
+    this.tidrapport.removeSjukDag(dag);
+    this.uppdateraRapport();
+  }
+
+  addSemesterdag() {
+    this.tidrapport.addSemester(new Dag(this.nySemesterdag.datum));
+    this.uppdateraRapport();
+  }
+
+  removeSemesterdag(dag) {
+    this.tidrapport.removeSemester(dag);
     this.uppdateraRapport();
   }
 }

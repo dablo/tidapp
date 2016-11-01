@@ -370,9 +370,9 @@ define('tid-rapport',['exports', 'aurelia-event-aggregator', './web-api', './mes
       this.tidrapport.period = new _tidrapport.Period();
 
       this.nyTid = new _tidrapport.Tid();
-      this.nyVabDag = new _tidrapport.Dag();
-      this.nySjukDag = new _tidrapport.Dag();
-      this.nySemesterDag = new _tidrapport.Dag();
+      this.nyVabdag = new _tidrapport.Dag();
+      this.nySjukdag = new _tidrapport.Dag();
+      this.nySemesterdag = new _tidrapport.Dag();
     };
 
     ContactDetail.prototype.save = function save() {
@@ -399,23 +399,42 @@ define('tid-rapport',['exports', 'aurelia-event-aggregator', './web-api', './mes
     };
 
     ContactDetail.prototype.addTid = function addTid() {
-
       this.tidrapport.addTid(new _tidrapport.Tid(this.nyTid.kund, this.nyTid.projekt, this.nyTid.timmar, this.nyTid.timpris));
       this.uppdateraRapport();
     };
 
-    ContactDetail.prototype.addVabDag = function addVabDag() {
-      this.tidrapport.addVab(new _tidrapport.Dag(nyVabDag.datum, nyVabDag.kommentar));
+    ContactDetail.prototype.removeTid = function removeTid(tid) {
+      this.tidrapport.removeTid(tid);
       this.uppdateraRapport();
     };
 
-    ContactDetail.prototype.addSjukDag = function addSjukDag() {
-      this.tidrapport.addSjukDag(new _tidrapport.Dag(nySjukDag.datum, nySjukDag.kommentar));
+    ContactDetail.prototype.addVabdag = function addVabdag() {
+      this.tidrapport.addVab(new _tidrapport.Dag(this.nyVabdag.datum, this.nyVabdag.kommentar));
       this.uppdateraRapport();
     };
 
-    ContactDetail.prototype.addSemesterDag = function addSemesterDag() {
-      this.tidrapport.addSemester(new _tidrapport.Dag(nySemesterDag.datum, nySemesterDag.kommentar));
+    ContactDetail.prototype.removeVabdag = function removeVabdag(dag) {
+      this.tidrapport.removeVab(dag);
+      this.uppdateraRapport();
+    };
+
+    ContactDetail.prototype.addSjukdag = function addSjukdag() {
+      this.tidrapport.addSjukDag(new _tidrapport.Dag(new Date(this.nySjukdag.datum), ''));
+      this.uppdateraRapport();
+    };
+
+    ContactDetail.prototype.removeSjukdag = function removeSjukdag(dag) {
+      this.tidrapport.removeSjukDag(dag);
+      this.uppdateraRapport();
+    };
+
+    ContactDetail.prototype.addSemesterdag = function addSemesterdag() {
+      this.tidrapport.addSemester(new _tidrapport.Dag(this.nySemesterdag.datum));
+      this.uppdateraRapport();
+    };
+
+    ContactDetail.prototype.removeSemesterdag = function removeSemesterdag(dag) {
+      this.tidrapport.removeSemester(dag);
       this.uppdateraRapport();
     };
 
@@ -495,7 +514,7 @@ define('tidrapport',['exports'], function (exports) {
                 return x.summa();
             }).reduce(function (a, b) {
                 return a + b;
-            });
+            }, 0);
         };
 
         Tidrapport.prototype.summaTimmar = function summaTimmar() {
@@ -503,7 +522,7 @@ define('tidrapport',['exports'], function (exports) {
                 return parseInt(x.timmar);
             }).reduce(function (a, b) {
                 return a + b;
-            });
+            }, 0);
         };
 
         Tidrapport.prototype.format = function format() {
@@ -568,9 +587,6 @@ define('tidrapport',['exports'], function (exports) {
             _classCallCheck(this, Period);
 
             var now = new Date();
-
-            console.log(now);
-            console.log(now.getMonth());
 
             if (now.getDate() < 10) {
                 this.lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -821,5 +837,5 @@ define('text!contact-detail.html', ['module'], function(module) { module.exports
 define('text!contact-list.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"contact-list\">\r\n    <ul class=\"list-group\">\r\n      <li repeat.for=\"contact of contacts\" class=\"list-group-item ${contact.id === $parent.selectedId ? 'active' : ''}\">\r\n        <a route-href=\"route: tidrapport; params.bind: {id:contact.id}\" click.delegate=\"$parent.select(contact)\">\r\n          <h4 class=\"list-group-item-heading\">${contact.firstName} ${contact.lastName}</h4>\r\n          <p class=\"list-group-item-text\">${contact.email}</p>\r\n        </a>\r\n      </li>\r\n    </ul>\r\n  </div>\r\n</template>"; });
 define('text!login.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"no-selection text-center\">\r\n    <h2>${message}</h2>\r\n  </div>\r\n</template>"; });
 define('text!no-selection.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"no-selection text-center\">\r\n    <h2>${message}</h2>\r\n  </div>\r\n</template>"; });
-define('text!tid-rapport.html', ['module'], function(module) { module.exports = "<template>\r\n\t<div class=\"panel panel-primary\">\r\n\t\t<div class=\"panel-heading\">\r\n\t\t\t<h3 class=\"panel-title\">Tidrapport |> ${contact.firstName} ${contact.lastName}</h3>\r\n\t\t</div>\r\n\t\t<div class=\"panel-body\">\r\n\t\t\t<form role=\"form\" class=\"form-horizontal\">\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-3\">Kollega</label>\r\n\t\t\t\t\t<label class=\"col-sm-3\">Period</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-3\">${contact.firstName} ${contact.lastName}</label>\r\n\t\t\t\t\t<label class=\"col-sm-9\">${tidrapport.period.format()}</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">Kund</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Projekt</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Timmar</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Pris</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Summa</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\" repeat.for=\"timmar of tidrapport.projektTider\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.kund}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.projekt}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.timmar}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.timpris}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.summa()}</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"kund\" class=\"form-control\" value.bind=\"nyTid.kund\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"projekt\" class=\"form-control\" value.bind=\"nyTid.projekt\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"timmar\" class=\"form-control\" value.bind=\"nyTid.timmar\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"pris\" class=\"form-control\" value.bind=\"nyTid.timpris\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<button type=\"button\" click.delegate=\"addTid()\">Lägg till</button>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t</form>\r\n\t\t\t\t\t<pre id=\"rapport\">${rapportText}</pre>\r\n\t\t</div>\r\n\t</div>\r\n\r\n\t<div class=\"button-bar\">\r\n\t\t<button class=\"btn btn-success\" click.delegate=\"save()\" disabled.bind=\"!canSave\">Maila</button>\r\n\t\t<!-- Trigger -->\r\n\t\t<button class=\"btn btn-success copyButton\" data-clipboard-target=\"#rapport\" disabled.bind=\"!rapportText\">Kopiera</button>\r\n\t</div>\r\n\r\n</template>"; });
+define('text!tid-rapport.html', ['module'], function(module) { module.exports = "<template>\r\n\t<div class=\"panel panel-primary\">\r\n\t\t<div class=\"panel-heading\">\r\n\t\t\t<h3 class=\"panel-title\">Tidrapport |> ${contact.firstName} ${contact.lastName}</h3>\r\n\t\t</div>\r\n\t\t<div class=\"panel-body\">\r\n\t\t\t<form role=\"form\" class=\"form-horizontal\">\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-3\">Kollega</label>\r\n\t\t\t\t\t<label class=\"col-sm-3\">Period</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-3\">${contact.firstName} ${contact.lastName}</label>\r\n\t\t\t\t\t<label class=\"col-sm-9\">${tidrapport.period.format()}</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">Kund</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Projekt</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Timmar</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Pris</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Summa</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"row\" repeat.for=\"timmar of tidrapport.projektTider\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.kund}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.projekt}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.timmar}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.timpris}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.summa()}</label>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-default\" click.delegate=\"removeTid(timmar)\">Ta bort</button>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"kund\" class=\"form-control\" value.bind=\"nyTid.kund\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"projekt\" class=\"form-control\" value.bind=\"nyTid.projekt\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"timmar\" class=\"form-control\" value.bind=\"nyTid.timmar\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"pris\" class=\"form-control\" value.bind=\"nyTid.timpris\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-default\" click.delegate=\"addTid()\">Lägg till</button>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">Sjukdagar</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\" repeat.for=\"dag of tidrapport.Sjukdagar\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">${dag.datum}</label>\r\n\t\t\t\t\t<button type=\"button\" class=\"close\" click.deletgate=\"removeSjukdag(dag)\">Ta bort</button>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"datum\" class=\"form-control\" value.bind=\"nySjukdag.datum\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-default\" click.delegate=\"addSjukdag()\">Lägg till</button>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t</form>\r\n\t\t\t<pre id=\"rapport\">${rapportText}</pre>\r\n\t\t</div>\r\n\t</div>\r\n\r\n\t<div class=\"button-bar\">\r\n\t\t<button class=\"btn btn-success\" click.delegate=\"save()\" disabled.bind=\"!canSave\">Maila direkt</button>\r\n\t\t<!-- Trigger -->\r\n\t\t<button class=\"btn btn-success copyButton\" data-clipboard-target=\"#rapport\" disabled.bind=\"!rapportText\">Kopiera rapport</button>\r\n\t</div>\r\n\r\n</template>"; });
 //# sourceMappingURL=app-bundle.js.map
