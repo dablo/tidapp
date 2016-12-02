@@ -111,19 +111,22 @@ export class Period {
     constructor(år, månad) {
         var now = new Date();
 
-        if (now.getDate() < 10) {
-            this.lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
-            this.firstDay = new Date(now.getFullYear(), (now.getMonth() - 1 + 12) % 12, 1);
-        }
-        else {
-            this.lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-            this.firstDay = new Date(now.getFullYear(), (now.getMonth() + 12) % 12, 1);
-        }
-
         if (år > 0) {
             this.lastDay = new Date(år, månad + 1, 0);
             this.firstDay = new Date(år, (månad + 12) % 12, 1);
         }
+        else {
+
+            if (now.getDate() < 10) {
+                this.lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+                this.firstDay = new Date(now.getFullYear(), (now.getMonth() - 1 + 12) % 12, 1);
+            }
+            else {
+                this.lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                this.firstDay = new Date(now.getFullYear(), (now.getMonth() + 12) % 12, 1);
+            }
+        }
+
     }
 
     format() {

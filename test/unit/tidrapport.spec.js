@@ -1,8 +1,8 @@
-import {Tidrapport} from '../../src/tidrapport';
-import {Kollega} from '../../src/tidrapport';
-import {Period} from '../../src/tidrapport';
-import {Tid} from '../../src/tidrapport';
-import {Dag} from '../../src/tidrapport';
+import { Tidrapport } from '../../src/tidrapport';
+import { Kollega } from '../../src/tidrapport';
+import { Period } from '../../src/tidrapport';
+import { Tid } from '../../src/tidrapport';
+import { Dag } from '../../src/tidrapport';
 
 describe('kollega', () => {
 
@@ -20,11 +20,11 @@ describe('kollega', () => {
 describe('period', () => {
 
     it('har en start', () => {
-        expect(new Period().firstDay.getDate()).toBe(new Date('2016-10-01').getUTCDate());
+        expect(new Period(2016, 11).firstDay.getDate()).toBe(new Date('2016-12-01').getUTCDate());
     });
 
     it('har ett slut', () => {
-        expect(new Period().lastDay.getDate()).toBe(new Date('2016-10-31').getUTCDate());
+        expect(new Period(2016, 11).lastDay.getDate()).toBe(new Date('2016-12-31').getUTCDate());
     });
 
 });
@@ -108,10 +108,10 @@ describe('tidrapport', () => {
         rapport.addVab(new Dag(new Date(2016, 10, 6), 'Natalie'));
         rapport.addSemester(new Dag(new Date(2016, 10, 7), 'Kreta'));
 
-        expect(rapport.format().indexOf('150000')>1).toBe(true);
-        expect(rapport.format().indexOf('Förkyld')>1).toBe(true);
-        expect(rapport.format().indexOf('Natalie')>1).toBe(true);
-        expect(rapport.format().indexOf('Kreta')>1).toBe(true);
+        expect(rapport.format().indexOf('150000') > 1).toBe(true);
+        expect(rapport.format().indexOf('Förkyld') > 1).toBe(true);
+        expect(rapport.format().indexOf('Natalie') > 1).toBe(true);
+        expect(rapport.format().indexOf('Kreta') > 1).toBe(true);
     });
 
 });
