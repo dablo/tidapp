@@ -187,8 +187,8 @@ define('environment',["exports"], function (exports) {
     testing: true
   };
 });
-define('login',["exports"], function (exports) {
-  "use strict";
+define('login',['exports'], function (exports) {
+  'use strict';
 
   Object.defineProperty(exports, "__esModule", {
     value: true
@@ -200,11 +200,75 @@ define('login',["exports"], function (exports) {
     }
   }
 
-  var Login = exports.Login = function Login() {
-    _classCallCheck(this, Login);
+  var Login = exports.Login = function () {
+    function Login() {
+      _classCallCheck(this, Login);
 
-    this.message = "Logga in";
-  };
+      this.message = "Logga in";
+      this.CLIENT_ID = '700644107821-v054i5qmree3l9lt84vfbhq5k9t2f35q.apps.googleusercontent.com';
+      this.SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
+    }
+
+    Login.prototype.activate = function activate(params, routeConfig) {
+      this.routeConfig = routeConfig;
+    };
+
+    Login.prototype.checkAuth = function checkAuth() {
+      gapi.auth.authorize({
+        'client_id': CLIENT_ID,
+        'scope': SCOPES.join(' '),
+        'immediate': true
+      }, handleAuthResult);
+    };
+
+    Login.prototype.handleAuthResult = function handleAuthResult(authResult) {
+      var authorizeDiv = document.getElementById('authorize-div');
+      if (authResult && !authResult.error) {
+        authorizeDiv.style.display = 'none';
+
+        debugger;
+      } else {
+        authorizeDiv.style.display = 'inline';
+      }
+    };
+
+    Login.prototype.handleAuthClick = function handleAuthClick(event) {
+      gapi.auth.authorize({ client_id: CLIENT_ID, scope: SCOPES, immediate: false }, handleAuthResult);
+      return false;
+    };
+
+    Login.prototype.loadGmailApi = function loadGmailApi() {
+      gapi.client.load('gmail', 'v1', listLabels);
+    };
+
+    Login.prototype.listLabels = function listLabels() {
+      var request = gapi.client.gmail.users.labels.list({
+        'userId': 'me'
+      });
+
+      request.execute(function (resp) {
+        var labels = resp.labels;
+        appendPre('Labels:');
+
+        if (labels && labels.length > 0) {
+          for (i = 0; i < labels.length; i++) {
+            var label = labels[i];
+            appendPre(label.name);
+          }
+        } else {
+          appendPre('No Labels found.');
+        }
+      });
+    };
+
+    Login.prototype.appendPre = function appendPre(message) {
+      var pre = document.getElementById('output');
+      var textContent = document.createTextNode(message + '\n');
+      pre.appendChild(textContent);
+    };
+
+    return Login;
+  }();
 });
 define('main',['exports', './environment'], function (exports, _environment) {
   'use strict';
@@ -229,7 +293,7 @@ define('main',['exports', './environment'], function (exports, _environment) {
   });
 
   function configure(aurelia) {
-    aurelia.use.standardConfiguration().feature('resources');
+    aurelia.use.standardConfiguration().plugin('aurelia-bootstrap-datepicker').feature('resources');
 
     if (_environment2.default.debug) {
       aurelia.use.developmentLogging();
@@ -370,9 +434,7 @@ define('tid-rapport',['exports', 'aurelia-event-aggregator', './web-api', './mes
       this.tidrapport.period = new _tidrapport.Period();
 
       this.nyTid = new _tidrapport.Tid();
-      this.nyVabdag = new _tidrapport.Dag();
-      this.nySjukdag = new _tidrapport.Dag();
-      this.nySemesterdag = new _tidrapport.Dag();
+      this.nyDag = new _tidrapport.Dag();
     };
 
     ContactDetail.prototype.save = function save() {
@@ -409,7 +471,7 @@ define('tid-rapport',['exports', 'aurelia-event-aggregator', './web-api', './mes
     };
 
     ContactDetail.prototype.addVabdag = function addVabdag() {
-      this.tidrapport.addVab(new _tidrapport.Dag(this.nyVabdag.datum, this.nyVabdag.kommentar));
+      this.tidrapport.addVab(new _tidrapport.Dag(this.nyDag.dag));
       this.uppdateraRapport();
     };
 
@@ -419,7 +481,7 @@ define('tid-rapport',['exports', 'aurelia-event-aggregator', './web-api', './mes
     };
 
     ContactDetail.prototype.addSjukdag = function addSjukdag() {
-      this.tidrapport.addSjukDag(new _tidrapport.Dag(new Date(this.nySjukdag.datum), ''));
+      this.tidrapport.addSjukDag(new _tidrapport.Dag(this.nyDag.dag));
       this.uppdateraRapport();
     };
 
@@ -429,13 +491,17 @@ define('tid-rapport',['exports', 'aurelia-event-aggregator', './web-api', './mes
     };
 
     ContactDetail.prototype.addSemesterdag = function addSemesterdag() {
-      this.tidrapport.addSemester(new _tidrapport.Dag(this.nySemesterdag.datum));
+      this.tidrapport.addSemester(new _tidrapport.Dag(this.nyDag.dag));
       this.uppdateraRapport();
     };
 
     ContactDetail.prototype.removeSemesterdag = function removeSemesterdag(dag) {
       this.tidrapport.removeSemester(dag);
       this.uppdateraRapport();
+    };
+
+    ContactDetail.prototype.nyDagDateChanged = function nyDagDateChanged(datum) {
+      debugger;
     };
 
     _createClass(ContactDetail, [{
@@ -564,15 +630,18 @@ define('tidrapport',['exports'], function (exports) {
     }();
 
     var Dag = exports.Dag = function () {
-        function Dag(datum, kommentar) {
+        function Dag() {
+            var dag = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+            var kommentar = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+
             _classCallCheck(this, Dag);
 
-            this.datum = datum;
+            this.dag = dag;
             this.kommentar = kommentar;
         }
 
         Dag.prototype.format = function format() {
-            return this.datum.toISOString().slice(0, 10) + ' ' + this.kommentar;
+            return this.dag + ' ' + this.kommentar;
         };
 
         return Dag;
@@ -591,29 +660,47 @@ define('tidrapport',['exports'], function (exports) {
 
             var now = new Date();
 
-            if (now.getDate() < 10) {
-                this.lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
-                this.firstDay = new Date(now.getFullYear(), (now.getMonth() - 1 + 12) % 12, 1);
-            } else {
-                this.lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                this.firstDay = new Date(now.getFullYear(), (now.getMonth() + 12) % 12, 1);
-            }
-
             if (år > 0) {
                 this.lastDay = new Date(år, månad + 1, 0);
                 this.firstDay = new Date(år, (månad + 12) % 12, 1);
+            } else {
+
+                if (now.getDate() < 10) {
+                    this.lastDay = new Date(now.getFullYear(), now.getMonth(), 0);
+                    this.firstDay = new Date(now.getFullYear(), (now.getMonth() - 1 + 12) % 12, 1);
+                } else {
+                    this.lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    this.firstDay = new Date(now.getFullYear(), (now.getMonth() + 12) % 12, 1);
+                }
             }
         }
 
+        Period.prototype.formatDate = function formatDate(date) {
+            var d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+
+            return [year, month, day].join('-');
+        };
+
         Period.prototype.format = function format() {
-            return this.firstDay.getFullYear() + '-' + (this.firstDay.getMonth() + 1) + '-' + this.firstDay.getDate() + ' - ' + this.lastDay.getFullYear() + '-' + (this.lastDay.getMonth() + 1) + '-' + this.lastDay.getDate();
+            return this.formatDate(this.firstDay) + ' - ' + this.formatDate(this.lastDay);
         };
 
         return Period;
     }();
 
     var Tid = exports.Tid = function () {
-        function Tid(kund, projekt, timmar, timpris) {
+        function Tid() {
+            var kund = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+            var projekt = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+            var timmar = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+            var timpris = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+
             _classCallCheck(this, Tid);
 
             this.kund = kund;
@@ -838,7 +925,7 @@ define('text!app.html', ['module'], function(module) { module.exports = "<templa
 define('text!styles.css', ['module'], function(module) { module.exports = "body { padding-top: 70px; }\n\nsection {\n  margin: 0 20px;\n}\n\na:focus {\n  outline: none;\n}\n\n.navbar-nav li.loader {\n    margin: 12px 24px 0 6px;\n}\n\n.no-selection {\n  margin: 20px;\n}\n\n.contact-list {\n  overflow-y: auto;\n  border: 1px solid #ddd;\n  padding: 10px;\n}\n\n.panel {\n  margin: 20px;\n}\n\n.button-bar {\n  right: 0;\n  left: 0;\n  bottom: 0;\n  border-top: 1px solid #ddd;\n  background: white;\n}\n\n.button-bar > button {\n  float: right;\n  margin: 20px;\n}\n\nli.list-group-item {\n  list-style: none;\n}\n\nli.list-group-item > a {\n  text-decoration: none;\n}\n\nli.list-group-item.active > a {\n  color: white;\n}\n"; });
 define('text!contact-detail.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"panel panel-primary\">\r\n    <div class=\"panel-heading\">\r\n      <h3 class=\"panel-title\">Profile</h3>\r\n    </div>\r\n    <div class=\"panel-body\">\r\n      <form role=\"form\" class=\"form-horizontal\">\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">First Name</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"first name\" class=\"form-control\" value.bind=\"contact.firstName\">\r\n          </div>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">Last Name</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"last name\" class=\"form-control\" value.bind=\"contact.lastName\">\r\n          </div>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">Email</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"email\" class=\"form-control\" value.bind=\"contact.email\">\r\n          </div>\r\n        </div>\r\n\r\n        <div class=\"form-group\">\r\n          <label class=\"col-sm-2 control-label\">Phone Number</label>\r\n          <div class=\"col-sm-10\">\r\n            <input type=\"text\" placeholder=\"phone number\" class=\"form-control\" value.bind=\"contact.phoneNumber\">\r\n          </div>\r\n        </div>\r\n      </form>\r\n    </div>\r\n  </div>\r\n\r\n  <div class=\"button-bar\">\r\n    <button class=\"btn btn-success\" click.delegate=\"save()\" disabled.bind=\"!canSave\">Save</button>\r\n  </div>\r\n</template>"; });
 define('text!contact-list.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"contact-list\">\r\n    <ul class=\"list-group\">\r\n      <li repeat.for=\"contact of contacts\" class=\"list-group-item ${contact.id === $parent.selectedId ? 'active' : ''}\">\r\n        <a route-href=\"route: tidrapport; params.bind: {id:contact.id}\" click.delegate=\"$parent.select(contact)\">\r\n          <h4 class=\"list-group-item-heading\">${contact.firstName} ${contact.lastName}</h4>\r\n          <p class=\"list-group-item-text\">${contact.email}</p>\r\n        </a>\r\n      </li>\r\n    </ul>\r\n  </div>\r\n</template>"; });
-define('text!login.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"no-selection text-center\">\r\n    <h2>${message}</h2>\r\n  </div>\r\n</template>"; });
+define('text!login.html', ['module'], function(module) { module.exports = "<template>\r\n  <script type=\"text/javascript\">\r\n      // Your Client ID can be retrieved from your project in the Google\r\n      // Developer Console, https://console.developers.google.com\r\n      var CLIENT_ID = '700644107821-v054i5qmree3l9lt84vfbhq5k9t2f35q.apps.googleusercontent.com';\r\n\r\n      var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];\r\n\r\n      /**\r\n       * Check if current user has authorized this application.\r\n       */\r\n      function checkAuth() {\r\n        gapi.auth.authorize(\r\n          {\r\n            'client_id': CLIENT_ID,\r\n            'scope': SCOPES.join(' '),\r\n            'immediate': true\r\n          }, handleAuthResult);\r\n      }\r\n\r\n      /**\r\n       * Handle response from authorization server.\r\n       *\r\n       * @param {Object} authResult Authorization result.\r\n       */\r\n      function handleAuthResult(authResult) {\r\n        var authorizeDiv = document.getElementById('authorize-div');\r\n        if (authResult && !authResult.error) {\r\n          // Hide auth UI, then load client library.\r\n          authorizeDiv.style.display = 'none';\r\n          loadGmailApi();\r\n        } else {\r\n          // Show auth UI, allowing the user to initiate authorization by\r\n          // clicking authorize button.\r\n          authorizeDiv.style.display = 'inline';\r\n        }\r\n      }\r\n\r\n      /**\r\n       * Initiate auth flow in response to user clicking authorize button.\r\n       *\r\n       * @param {Event} event Button click event.\r\n       */\r\n      function handleAuthClick(event) {\r\n        gapi.auth.authorize(\r\n          {client_id: CLIENT_ID, scope: SCOPES, immediate: false},\r\n          handleAuthResult);\r\n        return false;\r\n      }\r\n\r\n      /**\r\n       * Load Gmail API client library. List labels once client library\r\n       * is loaded.\r\n       */\r\n      function loadGmailApi() {\r\n        gapi.client.load('gmail', 'v1', listLabels);\r\n      }\r\n\r\n      /**\r\n       * Print all Labels in the authorized user's inbox. If no labels\r\n       * are found an appropriate message is printed.\r\n       */\r\n      function listLabels() {\r\n        var request = gapi.client.gmail.users.labels.list({\r\n          'userId': 'me'\r\n        });\r\n\r\n        request.execute(function(resp) {\r\n          var labels = resp.labels;\r\n          appendPre('Labels:');\r\n\r\n          if (labels && labels.length > 0) {\r\n            for (i = 0; i < labels.length; i++) {\r\n              var label = labels[i];\r\n              appendPre(label.name)\r\n            }\r\n          } else {\r\n            appendPre('No Labels found.');\r\n          }\r\n        });\r\n      }\r\n\r\n      /**\r\n       * Append a pre element to the body containing the given message\r\n       * as its text node.\r\n       *\r\n       * @param {string} message Text to be placed in pre element.\r\n       */\r\n      function appendPre(message) {\r\n        var pre = document.getElementById('output');\r\n        var textContent = document.createTextNode(message + '\\n');\r\n        pre.appendChild(textContent);\r\n      }\r\n\r\n    </script>\r\n    <script src=\"https://apis.google.com/js/client.js?onload=checkAuth\">\r\n    </script>\r\n  <div class=\"no-selection text-center\">\r\n    <h2>${message}</h2>\r\n    <div id=\"authorize-div\" style=\"display: none\">\r\n      <span>Authorize access to Gmail API</span>\r\n      <!--Button for the user to click to initiate auth sequence -->\r\n      <button id=\"authorize-button\" onclick=\"handleAuthClick(event)\">\r\n        Authorize\r\n      </button>\r\n    </div>\r\n\r\n  </div>\r\n</template>"; });
 define('text!no-selection.html', ['module'], function(module) { module.exports = "<template>\r\n  <div class=\"no-selection text-center\">\r\n    <h2>${message}</h2>\r\n  </div>\r\n</template>"; });
-define('text!tid-rapport.html', ['module'], function(module) { module.exports = "<template>\r\n\t<div class=\"panel panel-primary\">\r\n\t\t<div class=\"panel-heading\">\r\n\t\t\t<h3 class=\"panel-title\">Tidrapport |> ${contact.firstName} ${contact.lastName}</h3>\r\n\t\t</div>\r\n\t\t<div class=\"panel-body\">\r\n\t\t\t<form role=\"form\" class=\"form-horizontal\">\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-3\">Kollega</label>\r\n\t\t\t\t\t<label class=\"col-sm-3\">Period</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-3\">${contact.firstName} ${contact.lastName}</label>\r\n\t\t\t\t\t<label class=\"col-sm-9\">${tidrapport.period.format()}</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">Kund</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Projekt</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Timmar</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Pris</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Summa</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"row\" repeat.for=\"timmar of tidrapport.projektTider\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.kund}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.projekt}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.timmar}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.timpris}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.summa()}</label>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-default\" click.delegate=\"removeTid(timmar)\">Ta bort</button>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"kund\" class=\"form-control\" value.bind=\"nyTid.kund\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"projekt\" class=\"form-control\" value.bind=\"nyTid.projekt\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"timmar\" class=\"form-control\" value.bind=\"nyTid.timmar\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"pris\" class=\"form-control\" value.bind=\"nyTid.timpris\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-default\" click.delegate=\"addTid()\">Lägg till</button>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">Sjukdagar</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\" repeat.for=\"dag of tidrapport.Sjukdagar\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">${dag.datum}</label>\r\n\t\t\t\t\t<button type=\"button\" class=\"close\" click.deletgate=\"removeSjukdag(dag)\">Ta bort</button>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"datum\" class=\"form-control\" value.bind=\"nySjukdag.datum\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-default\" click.delegate=\"addSjukdag()\">Lägg till</button>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t</form>\r\n\t\t\t<pre id=\"rapport\">${rapportText}</pre>\r\n\t\t</div>\r\n\t</div>\r\n\r\n\t<div class=\"button-bar\">\r\n\t\t<button class=\"btn btn-success\" click.delegate=\"save()\" disabled.bind=\"!canSave\">Maila direkt</button>\r\n\t\t<!-- Trigger -->\r\n\t\t<button class=\"btn btn-success copyButton\" data-clipboard-target=\"#rapport\" disabled.bind=\"!rapportText\">Kopiera rapport</button>\r\n\t</div>\r\n\r\n</template>"; });
+define('text!tid-rapport.html', ['module'], function(module) { module.exports = "<template>\r\n\t<div class=\"panel panel-primary\">\r\n\t\t<div class=\"panel-heading\">\r\n\t\t\t<h3 class=\"panel-title\">Tidrapport |> ${contact.firstName} ${contact.lastName}</h3>\r\n\t\t</div>\r\n\t\t<div class=\"panel-body\">\r\n\t\t\t<form role=\"form\" class=\"form-horizontal\">\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-3\">Kollega</label>\r\n\t\t\t\t\t<label class=\"col-sm-3\">Period</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-3\">${contact.firstName} ${contact.lastName}</label>\r\n\t\t\t\t\t<label class=\"col-sm-9\">${tidrapport.period.format()}</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">Kund</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Projekt</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Timmar</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Pris</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">Summa</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"row\" repeat.for=\"timmar of tidrapport.projektTider\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.kund}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.projekt}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.timmar}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.timpris}</label>\r\n\t\t\t\t\t<label class=\"col-sm-2\">${timmar.summa()}</label>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-default\" click.delegate=\"removeTid(timmar)\">Ta bort</button>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"kund\" class=\"form-control\" value.bind=\"nyTid.kund\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"projekt\" class=\"form-control\" value.bind=\"nyTid.projekt\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"timmar\" class=\"form-control\" value.bind=\"nyTid.timmar\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"pris\" class=\"form-control\" value.bind=\"nyTid.timpris\">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-default\" click.delegate=\"addTid()\">Lägg till</button>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">Frånvaro</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<!--<div class=\"form-group\" repeat.for=\"dag of tidrapport.sjukDagar\">\r\n\t\t\t\t\t<label class=\"col-sm-2\">${dag.format()}</label>\r\n\t\t\t\t\t<button type=\"button\" class=\"close\" click.deletgate=\"removeSjukDag(dag)\">Ta bort</button>\r\n\t\t\t\t</div>-->\r\n\r\n\t\t\t\t<div class=\"form-group\">\r\n\t\t\t\t\t<div class=\"col-sm-4\">\r\n\t\t\t\t\t\t<input type=\"text\" placeholder=\"datum\" class=\"form-control\" value.bind=\"nyDag.dag\">\r\n\t\t\t\t\t\t<bootstrap-datepicker value.bind=\"'yyyy-mm-dd'\" dp-options.bind=\"dpOptions\" changedate.delegate=\"nyDagDateChanged($event)\"></bootstrap-datepicker>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-default\" click.delegate=\"addSjukdag()\">Sjukdag</button>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-default\" click.delegate=\"addVabdag()\">VAB</button>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t<div class=\"col-sm-2\">\r\n\t\t\t\t\t\t<button type=\"button\" class=\"btn btn-default\" click.delegate=\"addSemesterdag()\">Semester</button>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t</form>\r\n\t\t\t<pre id=\"rapport\">${rapportText}</pre>\r\n\t\t</div>\r\n\t</div>\r\n\r\n\t<div class=\"button-bar\">\r\n\t\t<button class=\"btn btn-success\" click.delegate=\"save()\" disabled.bind=\"!canSave\">Maila direkt</button>\r\n\t\t<!-- Trigger -->\r\n\t\t<button class=\"btn btn-success copyButton\" data-clipboard-target=\"#rapport\" disabled.bind=\"!rapportText\">Kopiera rapport</button>\r\n\t</div>\r\n\r\n</template>"; });
 //# sourceMappingURL=app-bundle.js.map

@@ -90,13 +90,13 @@ export class Tidrapport {
 }
 
 export class Dag {
-    constructor(datum, kommentar) {
-        this.datum = datum;
+    constructor(dag = '', kommentar = '') {
+        this.dag = dag;
         this.kommentar = kommentar;
     }
 
     format() {
-        return this.datum.toISOString().slice(0, 10) + ' ' + this.kommentar;
+        return this.dag + ' ' + this.kommentar;
     }
 }
 
@@ -129,13 +129,25 @@ export class Period {
 
     }
 
+    formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month, day].join('-');
+    }
+
     format() {
-        return this.firstDay.getFullYear() + '-' + (this.firstDay.getMonth() + 1) + '-' + this.firstDay.getDate() + ' - ' + this.lastDay.getFullYear() + '-' + (this.lastDay.getMonth() + 1) + '-' + this.lastDay.getDate()
+        return this.formatDate(this.firstDay) + ' - ' + this.formatDate(this.lastDay);
     }
 }
 
 export class Tid {
-    constructor(kund, projekt, timmar, timpris) {
+    constructor(kund = '', projekt = '', timmar = 0, timpris = 0) {
         this.kund = kund;
         this.projekt = projekt;
         this.timmar = timmar;

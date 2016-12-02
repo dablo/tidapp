@@ -19,12 +19,18 @@ describe('kollega', () => {
 
 describe('period', () => {
 
-    it('har en start', () => {
-        expect(new Period(2016, 11).firstDay.getDate()).toBe(new Date('2016-12-01').getUTCDate());
+    let februari = new Period(2016, 1);
+
+    it('har en startdag', () => {
+        expect(februari.firstDay.getDate()).toBe(new Date('2016-02-01').getUTCDate());
     });
 
-    it('har ett slut', () => {
-        expect(new Period(2016, 11).lastDay.getDate()).toBe(new Date('2016-12-31').getUTCDate());
+    it('har en slutdag', () => {
+        expect(februari.lastDay.getDate()).toBe(new Date('2016-02-29').getUTCDate());
+    });
+
+    it('formaterar datum som yyy-MM-dd', () => {
+        expect(februari.format()).toBe('2016-02-01 - 2016-02-29');
     });
 
 });

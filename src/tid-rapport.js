@@ -59,9 +59,7 @@ export class ContactDetail {
     this.tidrapport.period = new Period();
 
     this.nyTid = new Tid();
-    this.nyVabdag = new Dag();
-    this.nySjukdag = new Dag();
-    this.nySemesterdag = new Dag();
+    this.nyDag = new Dag();
   }
 
   get canSave() {
@@ -108,7 +106,7 @@ export class ContactDetail {
   }
 
   addVabdag() {
-    this.tidrapport.addVab(new Dag(this.nyVabdag.datum, this.nyVabdag.kommentar));
+    this.tidrapport.addVab(new Dag(this.nyDag.dag));
     this.uppdateraRapport();
   }
 
@@ -118,7 +116,7 @@ export class ContactDetail {
   }
 
   addSjukdag() {
-    this.tidrapport.addSjukDag(new Dag(new Date(this.nySjukdag.datum), ''));
+    this.tidrapport.addSjukDag(new Dag(this.nyDag.dag));
     this.uppdateraRapport();
   }
 
@@ -128,12 +126,16 @@ export class ContactDetail {
   }
 
   addSemesterdag() {
-    this.tidrapport.addSemester(new Dag(this.nySemesterdag.datum));
+    this.tidrapport.addSemester(new Dag(this.nyDag.dag));
     this.uppdateraRapport();
   }
 
   removeSemesterdag(dag) {
     this.tidrapport.removeSemester(dag);
     this.uppdateraRapport();
+  }
+
+  nyDagDateChanged(datum) {
+    debugger;
   }
 }
