@@ -113,8 +113,18 @@
           "aurelia-task-queue",
           "aurelia-templating",
           "aurelia-templating-binding",
-          "aurelia-bootstrap-datepicker",
           "jquery",
+          {
+            "name": "bootstrap-datepicker",
+            "path": "../node_modules/bootstrap-datepicker/dist",
+            "main": "js/bootstrap-datepicker.min",
+            "deps": [
+              "bootstrap"
+            ],
+            "resources": [
+              "css/bootstrap-datepicker.css"
+            ]
+          },
           {
             "name": "bootstrap",
             "path": "../node_modules/bootstrap/dist",
@@ -142,6 +152,11 @@
           {
             "name": "clipboard",
             "path": "../node_modules/clipboard/dist/clipboard"
+          },
+          {
+            "name": "aurelia-bootstrap-datepicker",
+            "path": "../node_modules/aurelia-bootstrap-datepicker/dist/amd",
+            "main": "aurelia-bootstrap-datepicker"
           },
           {
             "name": "aurelia-templating-resources",

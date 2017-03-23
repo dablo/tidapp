@@ -17,6 +17,7 @@
     "bluebird": "^3.4.1",
     "bootstrap": "^3.3.7",
     "clipboard": "^1.5.15",
+    "extend": "^3.0.0",
     "jquery": "^2.2.4",
     "nprogress": "^0.2.0"
   },

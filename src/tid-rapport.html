@@ -1,4 +1,5 @@
 <template>
+	<!--<require from="bootstrap-datepicker"></require>-->
 	<div class="panel panel-primary">
 		<div class="panel-heading">
 			<h3 class="panel-title">Tidrapport |> ${contact.firstName} ${contact.lastName}</h3>
@@ -56,15 +57,15 @@
 					<label class="col-sm-2">Frånvaro</label>
 				</div>
 
-				<!--<div class="form-group" repeat.for="dag of tidrapport.sjukDagar">
+				<div class="form-group" repeat.for="dag of tidrapport.sjukDagar">
 					<label class="col-sm-2">${dag.format()}</label>
-					<button type="button" class="close" click.deletgate="removeSjukDag(dag)">Ta bort</button>
-				</div>-->
+					<button type="button" class="btn btn-default" click.deletgate="removeSjukdag(dag)">Ta bort</button>
+				</div>
 
 				<div class="form-group">
 					<div class="col-sm-4">
 						<input type="text" placeholder="datum" class="form-control" value.bind="nyDag.dag">
-						<bootstrap-datepicker value.bind="'yyyy-mm-dd'" dp-options.bind="dpOptions" changedate.delegate="nyDagDateChanged($event)"></bootstrap-datepicker>
+						<!--<bootstrap-datepicker value.bind="'yyyy-mm-dd'" dp-options.bind="dpOptions" changedate.delegate="nyDagDateChanged($event)"></bootstrap-datepicker>-->
 					</div>
 					<div class="col-sm-2">
 						<button type="button" class="btn btn-default" click.delegate="addSjukdag()">Sjukdag</button>
