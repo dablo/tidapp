@@ -135,6 +135,16 @@ export class ContactDetail {
     this.uppdateraRapport();
   }
 
+  addForaldraledighetsdag() {
+    this.tidrapport.addForaldraledighet(new Dag(this.nyDag.dag));
+    this.uppdateraRapport();
+  }
+
+  removeForaldraledighetsdag(dag) {
+    this.tidrapport.removeForaldraledighet(dag);
+    this.uppdateraRapport();
+  }
+
   nyDagDateChanged(datum) {
     debugger;
   }

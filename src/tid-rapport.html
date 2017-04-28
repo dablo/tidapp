@@ -64,17 +64,22 @@
 				<div class="form-group">
 					<div class="col-sm-4">
 						<input type="text" placeholder="datum" class="form-control" value.bind="nyDag.dag">
-						<bootstrap-datepicker value.bind="'yyyy-mm-dd'" dp-options.bind="dpOptions" changedate.delegate="nyDagDateChanged($event)"></bootstrap-datepicker>
 					</div>
-					<div class="col-sm-2">
+					<div class="col-sm-8">
 						<button type="button" class="btn btn-default" click.delegate="addSjukdag()">Sjukdag</button>
+						<button type="button" class="btn btn-default" click.delegate="addVabdag()">VAB</button>
+						<button type="button" class="btn btn-default" click.delegate="addSemesterdag()">Semester</button>
+						<button type="button" class="btn btn-default" click.delegate="addForaldraledighetsdag()">Föräldraledighet</button>
 					</div>
-					<div class="col-sm-2">
+					<!--<div class="col-sm-1">
 						<button type="button" class="btn btn-default" click.delegate="addVabdag()">VAB</button>
 					</div>
-					<div class="col-sm-2">
+					<div class="col-sm-1">
 						<button type="button" class="btn btn-default" click.delegate="addSemesterdag()">Semester</button>
 					</div>
+					<div class="col-sm-5">
+						<button type="button" class="btn btn-default" click.delegate="addForaldraledighetsdag()">Föräldraledighet</button>
+					</div>-->
 				</div>
 
 			</form>

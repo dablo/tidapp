@@ -6,6 +6,7 @@ export class Tidrapport {
         this.vabDagar = [];
         this.sjukDagar = [];
         this.semesterDagar = [];
+        this.foraldraledighetsDagar = [];
     }
 
     addTid(tid) {
@@ -46,6 +47,15 @@ export class Tidrapport {
         if (index !== -1)
             this.semesterDagar.splice(dag);
     }
+    addForaldraledighet(dag) {
+        this.foraldraledighetsDagar.push(dag);
+    }
+
+    removeForaldraledighet(dag) {
+        var index = this.foraldraledighetsDagar.findIndex(dag);
+        if (index !== -1)
+            this.foraldraledighetsDagar.splice(dag);
+    }
 
     summaFaktura() {
         return this.projektTider.map(x => x.summa()).reduce((a, b) => a + b, 0);
@@ -84,6 +94,9 @@ export class Tidrapport {
 
         rapport += '\nSemester\n'
         this.semesterDagar.forEach(function (dag) { rapport += dag.format() + '\n' });
+
+        rapport += '\nFöräldraledighet\n'
+        this.foraldraledighetsDagar.forEach(function (dag) { rapport += dag.format() + '\n' });
 
         return rapport;
     }

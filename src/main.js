@@ -11,7 +11,7 @@ Promise.config({
 export function configure(aurelia) {
   aurelia.use
     .standardConfiguration()
-    .plugin('aurelia-bootstrap-datepicker')
+    //.plugin('aurelia-bootstrap-datepicker')
     .feature('resources');
 
   if (environment.debug) {
