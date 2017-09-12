@@ -86,19 +86,30 @@ export class Tidrapport {
             this.summaFaktura() + '\n';
 
 
-        rapport += '\nSjuk\n'
+        rapport += '\nSjuk' + this.dagarText(this.sjukDagar) + '\n';
         this.sjukDagar.forEach(function (dag) { rapport += dag.format() + '\n' });
 
-        rapport += '\nVAB\n'
+        rapport += '\nVAB' + this.dagarText(this.vabDagar) + '\n';
         this.vabDagar.forEach(function (dag) { rapport += dag.format() + '\n' });
 
-        rapport += '\nSemester\n'
+        rapport += '\nSemester' + this.dagarText(this.semesterDagar) + '\n';
         this.semesterDagar.forEach(function (dag) { rapport += dag.format() + '\n' });
 
-        rapport += '\nFöräldraledighet\n'
+        rapport += '\nFöräldraledighet' + this.dagarText(this.foraldraledighetsDagar) + '\n';
         this.foraldraledighetsDagar.forEach(function (dag) { rapport += dag.format() + '\n' });
 
         return rapport;
+    }
+
+    dagarText(dagar) {
+        if (dagar.length > 1) {
+            return ' (' + dagar.length + ' dagar)';
+        } else if (dagar.length < 1) {
+            return '';
+        }
+        else {
+            return ' (1 dag)';
+        }
     }
 }
 
